@@ -1,0 +1,13 @@
+# Ignore Go build artifacts
+*.exe
+*.so
+*.dylib
+*.test
+
+# Ignore vendor files (if not vendoring dependencies)
+vendor/
+
+# Ignore git files
+.git
+.gitignore
+

@@ -1,0 +1,8 @@
+# WARNING!
+# The values below is purley for development! 
+# Use your own keys and secrets for production env
+PORT=3001
+DATABASE="host=db user=gorm password=gorm dbname=gorm port=5432 sslmode=disable"
+JWT_SECRET=K9C8y44DUxz/RbCkPn+gV+csUDsbH1cRsebI53g9iNw=
+ENV=development
+# ENV=production
