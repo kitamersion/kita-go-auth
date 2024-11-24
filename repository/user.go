@@ -5,7 +5,6 @@ import (
 	"github.com/kitamersion/kita-go-auth/models"
 )
 
-// CreateUser creates a new user in the database.
 func CreateUser(user models.User) (models.User, error) {
 	err := initializers.DB.Create(&user).Error
 	if err != nil {
@@ -14,7 +13,6 @@ func CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-// FetchUserById retrieves a user by their ID.
 func FetchUserById(userId string) (models.User, error) {
 	var user models.User
 	err := initializers.DB.First(&user, "id = ?", userId).Error
@@ -24,7 +22,6 @@ func FetchUserById(userId string) (models.User, error) {
 	return user, nil
 }
 
-// FetchUserByEmail retrieves a user by their email.
 func FetchUserByEmail(email string) (models.User, error) {
 	var user models.User
 	err := initializers.DB.First(&user, "email = ?", email).Error
@@ -34,7 +31,6 @@ func FetchUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-// UpdateUserById updates a user record using the provided User struct.
 func UpdateUserById(userId string, userUpdates models.User) (models.User, error) {
 	var user models.User
 
@@ -62,7 +58,6 @@ func UpdateUserById(userId string, userUpdates models.User) (models.User, error)
 	return user, nil
 }
 
-// DeleteUserById removes a user by their ID.
 func DeleteUserById(userId string) error {
 	err := initializers.DB.Where("id = ?", userId).Delete(&models.User{}).Error
 	if err != nil {
@@ -71,7 +66,6 @@ func DeleteUserById(userId string) error {
 	return nil
 }
 
-// FetchAllUsers retrieves all users from the database.
 func FetchAllUsers() ([]models.User, error) {
 	var users []models.User
 	err := initializers.DB.Find(&users).Error

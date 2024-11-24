@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kitamersion/kita-go-auth/domains/common"
+	"github.com/kitamersion/kita-go-auth/domains/role"
 	"github.com/kitamersion/kita-go-auth/domains/users"
-	"github.com/kitamersion/kita-go-auth/initializers"
 	"github.com/kitamersion/kita-go-auth/models"
 	"github.com/kitamersion/kita-go-auth/repository"
 )
@@ -40,15 +40,13 @@ func User(c *gin.Context) {
 	}
 
 	// Fetch roles for the user
-	// TODO: create repo and service layer for Role
 	// TODO: consider moving this to RequireAuth middleware?
-	var roles []models.Role
-	initializers.DB.Where("user_id = ?", u.ID).Find(&roles)
-
-	// Initialize roleTypes as an empty slice
-	roleTypes := []models.RoleType{}
-	for _, role := range roles {
-		roleTypes = append(roleTypes, role.Role)
+	roleTypes, err := role.GetRoleTypeForUser(u.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Error fetching user roles",
+		})
+		return
 	}
 
 	response := UserResponse{
@@ -122,6 +120,7 @@ func DeactivateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User deactivated successfully"})
 }
 
+// TODO: transactional scope
 func DeleteUser(c *gin.Context) {
 	var body struct {
 		UserId string
@@ -149,6 +148,8 @@ func DeleteUser(c *gin.Context) {
 
 	// TODO: service for this??
 	repository.DeleteRefreshTokenByUserId(user.ID)
+
+	role.DeleteRolesByUserId(user.ID)
 
 	// TODO: move to common domain for user deletion and logout to clear cookies
 	c.SetCookie("Authorization", "", -1, "", "", common.IsProduction, true)
