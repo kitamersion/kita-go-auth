@@ -5,10 +5,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/kitamersion/kita-go-auth/domains/common"
-	"github.com/kitamersion/kita-go-auth/domains/users"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/kitamersion/kita-go-auth/domains/common"
+	"github.com/kitamersion/kita-go-auth/domains/users"
+	"github.com/kitamersion/kita-go-auth/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -45,6 +46,11 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
+
+	// update users last login date
+	// TODO: create a users service to update user
+	user.LastLoginAt = time.Now()
+	repository.UpdateUserById(user.ID, user)
 
 	// generate access token (JWT)
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{

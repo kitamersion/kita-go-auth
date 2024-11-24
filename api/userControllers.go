@@ -4,19 +4,22 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kitamersion/kita-go-auth/domains/common"
 	"github.com/kitamersion/kita-go-auth/domains/users"
+	"github.com/kitamersion/kita-go-auth/initializers"
 	"github.com/kitamersion/kita-go-auth/models"
 	"github.com/kitamersion/kita-go-auth/repository"
-	"github.com/gin-gonic/gin"
 )
 
 type UserResponse struct {
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	ActivatedAt *time.Time `json:"activated_at"` // Use a pointer to allow null values
-	Email       string     `json:"email"`
-	ID          string     `json:"id"`
+	LastLoginAt time.Time         `json:"last_login_at"`
+	CreatedAt   time.Time         `json:"created_at"`
+	UpdatedAt   time.Time         `json:"updated_at"`
+	ActivatedAt *time.Time        `json:"activated_at"` // Use a pointer to allow null values
+	Email       string            `json:"email"`
+	ID          string            `json:"id"`
+	Roles       []models.RoleType `json:"roles"`
 }
 
 func User(c *gin.Context) {
@@ -36,12 +39,26 @@ func User(c *gin.Context) {
 		activatedAt = nil
 	}
 
+	// Fetch roles for the user
+	// TODO: create repo and service layer for Role
+	// TODO: consider moving this to RequireAuth middleware?
+	var roles []models.Role
+	initializers.DB.Where("user_id = ?", u.ID).Find(&roles)
+
+	// Initialize roleTypes as an empty slice
+	roleTypes := []models.RoleType{}
+	for _, role := range roles {
+		roleTypes = append(roleTypes, role.Role)
+	}
+
 	response := UserResponse{
 		Email:       u.Email,
 		ID:          u.ID,
 		CreatedAt:   u.CreatedAt,
 		UpdatedAt:   u.UpdatedAt,
+		LastLoginAt: u.LastLoginAt,
 		ActivatedAt: activatedAt, // Set pointer or nil
+		Roles:       roleTypes,   // Will be an empty array if no roles
 	}
 
 	c.JSON(http.StatusOK, response)

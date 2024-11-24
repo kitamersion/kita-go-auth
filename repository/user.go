@@ -41,12 +41,13 @@ func UpdateUserById(userId string, userUpdates models.User) (models.User, error)
 	// Ensure we only update the fields provided in userUpdates
 	err := initializers.DB.Model(&models.User{}).
 		Where("id = ?", userId).
-		Select("Email", "Password", "UpdatedAt", "ActivatedAt").
+		Select("Email", "Password", "UpdatedAt", "ActivatedAt", "LastLoginAt").
 		Updates(models.User{
 			Email:       userUpdates.Email,
 			Password:    userUpdates.Password,
 			UpdatedAt:   userUpdates.UpdatedAt,
 			ActivatedAt: userUpdates.ActivatedAt,
+			LastLoginAt: userUpdates.LastLoginAt,
 		}).Error
 	if err != nil {
 		return models.User{}, err
