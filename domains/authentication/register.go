@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/kitamersion/kita-go-auth/domains/common"
 	"github.com/kitamersion/kita-go-auth/domains/role"
 	"github.com/kitamersion/kita-go-auth/domains/users"
 	"github.com/kitamersion/kita-go-auth/models"
@@ -21,18 +22,14 @@ func Register(c *gin.Context) {
 	}
 
 	if c.Bind(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to read body",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to read body"))
 		return
 	}
 
 	// hash password
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to hash password",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to hash password"))
 		return
 	}
 
@@ -50,9 +47,7 @@ func Register(c *gin.Context) {
 
 	result, err := users.CreateUser(user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to create user",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to create user"))
 		return
 	}
 
@@ -65,9 +60,7 @@ func Register(c *gin.Context) {
 
 	_, err = role.CreateRoleForUser(basicRole)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to add user role",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to add user role"))
 		return
 	}
 

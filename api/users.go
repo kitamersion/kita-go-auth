@@ -43,9 +43,7 @@ func WhoAmI(c *gin.Context) {
 	// TODO: consider moving this to RequireAuth middleware?
 	roleTypes, err := role.GetRoleTypeForUser(u.ID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error fetching user roles",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Error fetching user roles"))
 		return
 	}
 
@@ -65,17 +63,13 @@ func WhoAmI(c *gin.Context) {
 func User(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to target user ID from url pathname",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 
 	user, err := users.GetUserById(targetUserID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error fetching user",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Error fetching user"))
 		return
 	}
 
@@ -91,9 +85,7 @@ func User(c *gin.Context) {
 	// TODO: consider moving this to RequireAuth middleware?
 	roleTypes, err := role.GetRoleTypeForUser(user.ID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Error fetching user roles",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Error fetching user roles"))
 		return
 	}
 
@@ -113,9 +105,7 @@ func User(c *gin.Context) {
 func ActivateUser(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to target user ID from url pathname",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 
@@ -139,9 +129,7 @@ func ActivateUser(c *gin.Context) {
 func DeactivateUser(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to target user ID from url pathname",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 
@@ -166,9 +154,7 @@ func DeactivateUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to target user ID from url pathname",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 

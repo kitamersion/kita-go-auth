@@ -23,9 +23,9 @@ func AddUserRole(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to read body",
-		})
+		c.JSON(http.StatusBadRequest, 
+common.CreateResponse("Failed to read body"),
+	)
 		return
 	}
 
@@ -47,7 +47,7 @@ func AddUserRole(c *gin.Context) {
 	}
 
 	if common.UserRoleTypesContains(userRolesTypes, body.Role) {
-		c.JSON(http.StatusOK, gin.H{"message": "User role already exists", "role": body.Role})
+		c.JSON(http.StatusOK, common.CreateResponse("User role already exists"))
 		return
 	}
 
@@ -69,9 +69,9 @@ func AddUserRole(c *gin.Context) {
 func RemoveUserRole(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if targetUserID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to target user ID from URL pathname",
-		})
+		c.JSON(http.StatusBadRequest, 
+common.CreateResponse("Failed to target user ID from URL pathname")
+		)
 		return
 	}
 
@@ -80,9 +80,9 @@ func RemoveUserRole(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to read body",
-		})
+		c.JSON(http.StatusBadRequest, 
+common.CreateResponse("Failed to read body")
+		)
 		return
 	}
 

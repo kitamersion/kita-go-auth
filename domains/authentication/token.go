@@ -7,12 +7,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/kitamersion/kita-go-auth/domains/common"
-	"github.com/kitamersion/kita-go-auth/models"
-	"github.com/kitamersion/kita-go-auth/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/kitamersion/kita-go-auth/domains/common"
+	"github.com/kitamersion/kita-go-auth/models"
+	"github.com/kitamersion/kita-go-auth/repository"
 	"gorm.io/gorm"
 )
 
@@ -46,9 +46,7 @@ func RefreshToken(c *gin.Context) {
 	// Sign and get the complete encoded access token as a string
 	newAccessTokenString, err := newAccessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to generate new access token",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to generate new access token"))
 		return
 	}
 

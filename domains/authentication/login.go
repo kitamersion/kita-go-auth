@@ -21,9 +21,7 @@ func Login(c *gin.Context) {
 	}
 
 	if c.Bind(&body) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to read body",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to read body"))
 		return
 	}
 
@@ -32,18 +30,14 @@ func Login(c *gin.Context) {
 
 	// Return early if user doesn't exist or error occurs
 	if userErr != nil || user.ID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid email or password",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Invalid email or password"))
 		return
 	}
 
 	// compare password hash against db user
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Invalid email or password",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Invalid email or password"))
 		return
 	}
 
@@ -61,18 +55,14 @@ func Login(c *gin.Context) {
 	// Sign and get the complete encoded access token as a string
 	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to generate access token",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to generate access token"))
 		return
 	}
 
 	// generate refresh token (longer expiration, e.g., 30 days)
 	refreshToken, err := GenerateRefreshToken(user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Failed to generate refresh token",
-		})
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to generate refresh token"))
 		return
 	}
 
