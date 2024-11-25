@@ -22,7 +22,7 @@ type UserResponse struct {
 	Roles       []models.RoleType `json:"roles"`
 }
 
-func User(c *gin.Context) {
+func WhoAmI(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -62,19 +62,64 @@ func User(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func ActivateUser(c *gin.Context) {
-	var body struct {
-		UserId string
-	}
-
-	if c.Bind(&body) != nil {
+func User(c *gin.Context) {
+	targetUserID := c.Param("id")
+	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
+			"error": "Failed to target user ID from url pathname",
 		})
 		return
 	}
 
-	user, userErr := users.GetUserById(body.UserId)
+	user, err := users.GetUserById(targetUserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Error fetching user",
+		})
+		return
+	}
+
+	// Handle nullable timestamp
+	var activatedAt *time.Time
+	if user.ActivatedAt.Valid {
+		activatedAt = &user.ActivatedAt.Time
+	} else {
+		activatedAt = nil
+	}
+
+	// Fetch roles for the user
+	// TODO: consider moving this to RequireAuth middleware?
+	roleTypes, err := role.GetRoleTypeForUser(user.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Error fetching user roles",
+		})
+		return
+	}
+
+	response := UserResponse{
+		Email:       user.Email,
+		ID:          user.ID,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+		LastLoginAt: user.LastLoginAt,
+		ActivatedAt: activatedAt, // Set pointer or nil
+		Roles:       roleTypes,   // Will be an empty array if no roles
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func ActivateUser(c *gin.Context) {
+	targetUserID := c.Param("id")
+	if c.Bind(&targetUserID) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Failed to target user ID from url pathname",
+		})
+		return
+	}
+
+	user, userErr := users.GetUserById(targetUserID)
 	if userErr != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -92,18 +137,15 @@ func ActivateUser(c *gin.Context) {
 }
 
 func DeactivateUser(c *gin.Context) {
-	var body struct {
-		UserId string
-	}
-
-	if c.Bind(&body) != nil {
+	targetUserID := c.Param("id")
+	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
+			"error": "Failed to target user ID from url pathname",
 		})
 		return
 	}
 
-	user, userErr := users.GetUserById(body.UserId)
+	user, userErr := users.GetUserById(targetUserID)
 	if userErr != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
@@ -122,23 +164,33 @@ func DeactivateUser(c *gin.Context) {
 
 // TODO: transactional scope
 func DeleteUser(c *gin.Context) {
-	var body struct {
-		UserId string
-	}
-
-	if c.Bind(&body) != nil {
+	targetUserID := c.Param("id")
+	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
+			"error": "Failed to target user ID from url pathname",
 		})
 		return
 	}
 
-	user, userErr := users.GetUserById(body.UserId)
-	if userErr != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+	var user models.User
+	u, exists := c.Get("user")
+	if !exists {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
+	authUser := u.(models.User)
+
+	if authUser.ID != targetUserID {
+		userRecord, userErr := users.GetUserById(targetUserID)
+		if userErr != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		user = userRecord
+	} else {
+		user = authUser
+	}
 	// Use the user data (e.g., user ID)
 	err := users.DeleteUser(user.ID)
 	if err != nil {
@@ -151,10 +203,11 @@ func DeleteUser(c *gin.Context) {
 
 	role.DeleteRolesByUserId(user.ID)
 
-	// TODO: move to common domain for user deletion and logout to clear cookies
-	c.SetCookie("Authorization", "", -1, "", "", common.IsProduction, true)
-	c.SetCookie("RefreshToken", "", -1, "", "", common.IsProduction, true)
-
+	if authUser.ID == targetUserID {
+		// TODO: move to common domain for user deletion and logout to clear cookies
+		c.SetCookie("Authorization", "", -1, "", "", common.IsProduction, true)
+		c.SetCookie("RefreshToken", "", -1, "", "", common.IsProduction, true)
+	}
 	// Respond with success
 	c.JSON(http.StatusOK, gin.H{"message": "User successfully deleted"})
 }

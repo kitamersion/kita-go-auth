@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kitamersion/kita-go-auth/domains/users"
-	"github.com/kitamersion/kita-go-auth/models"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/kitamersion/kita-go-auth/domains/role"
+	"github.com/kitamersion/kita-go-auth/domains/users"
+	"github.com/kitamersion/kita-go-auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -51,6 +52,21 @@ func Register(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Failed to create user",
+		})
+		return
+	}
+
+	// add guest user role
+	basicRole := models.Role{
+		ID:     uuid.New().String(),
+		UserID: user.ID,
+		Role:   models.Guest,
+	}
+
+	_, err = role.CreateRoleForUser(basicRole)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Failed to add user role",
 		})
 		return
 	}

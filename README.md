@@ -56,9 +56,9 @@ docker stop $(docker ps -aq) && docker rm $(docker ps -aq); podman rm kita-go-au
 
 ## Goals
 
-Including the list below, the general goal is to create an isolated application that is part of cluster. (Authentication and/or users management as a domain.)
+Including the list below, the goal is to create a microservice focused on authentication and user management as a domain.
 
 - [x] Basic CRUD operations for user
-- [ ] Basic role system: Admin, Standard etc.. (Possibly admin provided roles? - out of scope but potentially an option)
+- [ ] Basic role system: Admin, Basic, Guest
 - [ ] Admin CRUD operations to control users (User CRUD)
 - [ ] Something else?
