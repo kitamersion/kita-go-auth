@@ -21,7 +21,6 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
-		// Public endpoints
 		v1.POST("/register", authentication.Register)
 		v1.POST("/login", authentication.Login)
 		v1.POST("/token/refresh", authentication.RefreshToken)
@@ -44,7 +43,6 @@ func main() {
 				roles.DELETE("/", api.RemoveUserRole)
 			}
 
-			// Other user-specific actions
 			user.POST("/logout", authentication.Logout)
 		}
 	}
