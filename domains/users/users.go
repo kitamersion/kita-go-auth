@@ -19,7 +19,6 @@ func CreateUser(user models.User) (models.User, error) {
 	return response, nil
 }
 
-// GetUserById retrieves a user by their ID.
 func GetUserById(userId string) (models.User, error) {
 	if userId == "" {
 		return models.User{}, errors.New("user ID cannot be empty")
@@ -33,7 +32,6 @@ func GetUserById(userId string) (models.User, error) {
 	return user, nil
 }
 
-// GetUserByEmail retrieves a user by their email.
 func GetUserByEmail(email string) (models.User, error) {
 	if email == "" {
 		return models.User{}, errors.New("user ID cannot be empty")
@@ -47,7 +45,6 @@ func GetUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-// ActivateUser activates a user by updating their "ActivatedAt" field.
 func ActivateUser(userId string) error {
 	if userId == "" {
 		log.Println("ActivateUser: user ID cannot be empty")
@@ -78,7 +75,6 @@ func ActivateUser(userId string) error {
 	return nil
 }
 
-// DeactivateUser deactivates a user by nullifying their "ActivatedAt" field.
 func DeactivateUser(userId string) error {
 	if userId == "" {
 		log.Println("DeactivateUser: user ID cannot be empty")
@@ -108,7 +104,6 @@ func DeactivateUser(userId string) error {
 	return nil
 }
 
-// DeleteUser removes a user by their ID.
 func DeleteUser(userId string) error {
 	if userId == "" {
 		return errors.New("user ID cannot be empty")
