@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kitamersion/kita-go-auth/domains/common"
 	"golang.org/x/time/rate"
 )
 
@@ -13,6 +14,6 @@ func RateLimiter(c *gin.Context) {
 	if limiter.Allow() {
 		c.Next()
 	} else {
-		c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"error": "Rate limit exceed"})
+		c.AbortWithStatusJSON(http.StatusTooManyRequests, common.CreateResponse("Rate limit exceed"))
 	}
 }

@@ -22,7 +22,7 @@ func Login(c *gin.Context) {
 
 	if c.Bind(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
+			"message": "Failed to read body",
 		})
 		return
 	}
@@ -33,7 +33,7 @@ func Login(c *gin.Context) {
 	// Return early if user doesn't exist or error occurs
 	if userErr != nil || user.ID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid email or password",
+			"message": "Invalid email or password",
 		})
 		return
 	}
@@ -42,7 +42,7 @@ func Login(c *gin.Context) {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid email or password",
+			"message": "Invalid email or password",
 		})
 		return
 	}
@@ -62,7 +62,7 @@ func Login(c *gin.Context) {
 	accessTokenString, err := accessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to generate access token",
+			"message": "Failed to generate access token",
 		})
 		return
 	}
@@ -71,7 +71,7 @@ func Login(c *gin.Context) {
 	refreshToken, err := GenerateRefreshToken(user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to generate refresh token",
+			"message": "Failed to generate refresh token",
 		})
 		return
 	}

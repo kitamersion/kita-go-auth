@@ -20,20 +20,20 @@ func RefreshToken(c *gin.Context) {
 	// Get refresh token from cookies
 	refreshTokenString, err := c.Cookie("RefreshToken")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token not found"})
+		c.JSON(http.StatusUnauthorized, common.CreateResponse("Refresh token not found"))
 		return
 	}
 
 	// Find the refresh token in the database
 	refreshTokenRecord, err := repository.FetchRefreshTokenByToken(refreshTokenString)
 	if err != nil || refreshTokenRecord.ID == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired refresh token"})
+		c.JSON(http.StatusUnauthorized, common.CreateResponse("Invalid or expired refresh token"))
 		return
 	}
 
 	// Check if the refresh token has expired
 	if refreshTokenRecord.ExpiresAt.Before(time.Now()) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Refresh token expired"})
+		c.JSON(http.StatusUnauthorized, common.CreateResponse("Refresh token expired"))
 		return
 	}
 
@@ -47,7 +47,7 @@ func RefreshToken(c *gin.Context) {
 	newAccessTokenString, err := newAccessToken.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to generate new access token",
+			"message": "Failed to generate new access token",
 		})
 		return
 	}

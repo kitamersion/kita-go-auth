@@ -22,7 +22,7 @@ func Register(c *gin.Context) {
 
 	if c.Bind(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to read body",
+			"message": "Failed to read body",
 		})
 		return
 	}
@@ -31,7 +31,7 @@ func Register(c *gin.Context) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to hash password",
+			"message": "Failed to hash password",
 		})
 		return
 	}
@@ -51,7 +51,7 @@ func Register(c *gin.Context) {
 	result, err := users.CreateUser(user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to create user",
+			"message": "Failed to create user",
 		})
 		return
 	}
@@ -66,7 +66,7 @@ func Register(c *gin.Context) {
 	_, err = role.CreateRoleForUser(basicRole)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to add user role",
+			"message": "Failed to add user role",
 		})
 		return
 	}

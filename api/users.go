@@ -25,7 +25,7 @@ type UserResponse struct {
 func WhoAmI(c *gin.Context) {
 	user, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 		return
 	}
 
@@ -44,7 +44,7 @@ func WhoAmI(c *gin.Context) {
 	roleTypes, err := role.GetRoleTypeForUser(u.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Error fetching user roles",
+			"message": "Error fetching user roles",
 		})
 		return
 	}
@@ -66,7 +66,7 @@ func User(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to target user ID from url pathname",
+			"message": "Failed to target user ID from url pathname",
 		})
 		return
 	}
@@ -74,7 +74,7 @@ func User(c *gin.Context) {
 	user, err := users.GetUserById(targetUserID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Error fetching user",
+			"message": "Error fetching user",
 		})
 		return
 	}
@@ -92,7 +92,7 @@ func User(c *gin.Context) {
 	roleTypes, err := role.GetRoleTypeForUser(user.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Error fetching user roles",
+			"message": "Error fetching user roles",
 		})
 		return
 	}
@@ -114,52 +114,52 @@ func ActivateUser(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to target user ID from url pathname",
+			"message": "Failed to target user ID from url pathname",
 		})
 		return
 	}
 
 	user, userErr := users.GetUserById(targetUserID)
 	if userErr != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 		return
 	}
 
 	// Use the user data (e.g., user ID)
 	err := users.ActivateUser(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while activating user"})
+		c.JSON(http.StatusInternalServerError, common.CreateResponse("Error while activating user"))
 		return
 	}
 
 	// Respond with success
-	c.JSON(http.StatusOK, gin.H{"message": "User activated successfully"})
+	c.JSON(http.StatusOK, common.CreateResponse("User activated successfully"))
 }
 
 func DeactivateUser(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to target user ID from url pathname",
+			"message": "Failed to target user ID from url pathname",
 		})
 		return
 	}
 
 	user, userErr := users.GetUserById(targetUserID)
 	if userErr != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 		return
 	}
 
 	// Use the user data (e.g., user ID)
 	err := users.DeactivateUser(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error while deactivating user"})
+		c.JSON(http.StatusInternalServerError, common.CreateResponse("Error while deactivating user"))
 		return
 	}
 
 	// Respond with success
-	c.JSON(http.StatusOK, gin.H{"message": "User deactivated successfully"})
+	c.JSON(http.StatusOK, common.CreateResponse("User deactivated successfully"))
 }
 
 // TODO: transactional scope
@@ -167,7 +167,7 @@ func DeleteUser(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if c.Bind(&targetUserID) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to target user ID from url pathname",
+			"message": "Failed to target user ID from url pathname",
 		})
 		return
 	}
@@ -175,7 +175,7 @@ func DeleteUser(c *gin.Context) {
 	var user models.User
 	u, exists := c.Get("user")
 	if !exists {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, common.CreateResponse("User not authenticated"))
 		return
 	}
 
@@ -184,7 +184,7 @@ func DeleteUser(c *gin.Context) {
 	if authUser.ID != targetUserID {
 		userRecord, userErr := users.GetUserById(targetUserID)
 		if userErr != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 			return
 		}
 		user = userRecord
@@ -194,7 +194,7 @@ func DeleteUser(c *gin.Context) {
 	// Use the user data (e.g., user ID)
 	err := users.DeleteUser(user.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting user"})
+		c.JSON(http.StatusInternalServerError, common.CreateResponse("Error deleting user"))
 		return
 	}
 
@@ -209,5 +209,5 @@ func DeleteUser(c *gin.Context) {
 		c.SetCookie("RefreshToken", "", -1, "", "", common.IsProduction, true)
 	}
 	// Respond with success
-	c.JSON(http.StatusOK, gin.H{"message": "User successfully deleted"})
+	c.JSON(http.StatusOK, common.CreateResponse("User successfully deleted"))
 }
