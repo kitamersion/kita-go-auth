@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/kitamersion/kita-go-auth/api"
 	"github.com/kitamersion/kita-go-auth/domains/authentication"
 	"github.com/kitamersion/kita-go-auth/initializers"
 	"github.com/kitamersion/kita-go-auth/middleware"
-	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -31,6 +31,10 @@ func main() {
 			user.POST("/activate", api.ActivateUser)     // TODO: middleware to only deactivate self or admin
 			user.POST("/deactivate", api.DeactivateUser) // TODO: middleware to only activate self on login or admin
 			user.DELETE("/delete", api.DeleteUser)       // TODO: middle ware to only delete self or admin
+
+			user.POST("/role", api.AddUserRole)      // TODO: moddleware for only admins to modify
+			user.DELETE("/role", api.RemoveUserRole) // TODO: moddleware for only admins to modify
+
 			user.POST("/logout", authentication.Logout)
 		}
 	}
