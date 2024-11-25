@@ -23,9 +23,9 @@ func AddUserRole(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, 
-common.CreateResponse("Failed to read body"),
-	)
+		c.JSON(http.StatusBadRequest,
+			common.CreateResponse("Failed to read body"),
+		)
 		return
 	}
 
@@ -69,9 +69,7 @@ common.CreateResponse("Failed to read body"),
 func RemoveUserRole(c *gin.Context) {
 	targetUserID := c.Param("id")
 	if targetUserID == "" {
-		c.JSON(http.StatusBadRequest, 
-common.CreateResponse("Failed to target user ID from URL pathname")
-		)
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from URL pathname"))
 		return
 	}
 
@@ -80,9 +78,7 @@ common.CreateResponse("Failed to target user ID from URL pathname")
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, 
-common.CreateResponse("Failed to read body")
-		)
+		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to read body"))
 		return
 	}
 
