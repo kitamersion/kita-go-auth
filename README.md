@@ -26,6 +26,14 @@ Thank you in advance for any feedback, issues reports and contributions!
 - Rate
 - GoDotEnv
 
+## Docker image
+
+https://hub.docker.com/r/helpfulfish/kita-go-auth/tags
+
+```
+docker pull helpfulfish/kita-go-auth:latest
+```
+
 ## Development
 
 Run the following command to build the Docker image:
