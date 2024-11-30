@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:17.2-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: gorm
+      POSTGRES_PASSWORD: gorm
+      POSTGRES_DB: gorm
+    ports:
+      - "5432:5432"
+    volumes:
+      - ~/Documents/repos/kitamersion/kita-go-auth/postgres-data:/var/lib/postgresql/data # Use full path for volume
+
+  pgadmin:
+    image: docker.io/dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80" # Exposes pgAdmin on the host's port 5050
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "db", "-p", "5432", "-U", "gorm"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  api:
+    image: localhost/kita-go-auth:latest
+    container_name: kita-go-auth
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: gorm
+      DB_PASSWORD: gorm
+      DB_NAME: gorm
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db

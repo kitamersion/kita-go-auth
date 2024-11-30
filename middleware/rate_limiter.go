@@ -9,7 +9,7 @@ import (
 )
 
 func RateLimiter(c *gin.Context) {
-	limiter := rate.NewLimiter(1, 4) // allows 4 requests per second
+	limiter := rate.NewLimiter(1, 3) // allows 3 requests per second
 
 	if limiter.Allow() {
 		c.Next()
