@@ -16,6 +16,7 @@ func init() {
 
 func main() {
 	r := gin.Default()
+
 	r.Use(middleware.RateLimiter)
 
 	v1 := r.Group("/v1")
@@ -24,16 +25,23 @@ func main() {
 		v1.POST("/login", authentication.Login)
 		v1.POST("/token/refresh", authentication.RefreshToken)
 
-		// Inner group for user-specific actions
-		user := v1.Group("/user", middleware.RequireAuth)
-		{
-			user.GET("/", api.User)
-			user.POST("/activate", api.ActivateUser)     // TODO: middleware to only deactivate self or admin
-			user.POST("/deactivate", api.DeactivateUser) // TODO: middleware to only activate self on login or admin
-			user.DELETE("/delete", api.DeleteUser)       // TODO: middle ware to only delete self or admin
+		v1.GET("/whoami", middleware.RequireAuth, api.WhoAmI)
 
-			user.POST("/role", api.AddUserRole)      // TODO: moddleware for only admins to modify
-			user.DELETE("/role", api.RemoveUserRole) // TODO: moddleware for only admins to modify
+		user := v1.Group("/user")
+		user.Use(middleware.RequireAuth, middleware.CanViewEditSelf)
+		{
+			user.GET("/:id", api.User)
+			user.PUT("/:id/activate", api.ActivateUser)
+			user.PUT("/:id/deactivate", api.DeactivateUser)
+			user.DELETE("/:id/delete", api.DeleteUser)
+
+			// Admin-restricted role management
+			roles := user.Group("/:id/role")
+			roles.Use(middleware.AdminOnly)
+			{
+				roles.PUT("/", api.AddUserRole)
+				roles.DELETE("/", api.RemoveUserRole)
+			}
 
 			user.POST("/logout", authentication.Logout)
 		}

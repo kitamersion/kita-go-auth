@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:17.2-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: gorm
+      POSTGRES_PASSWORD: gorm
+      POSTGRES_DB: gorm
+    ports:
+      - "5432:5432"
+    volumes:
+      - /root/postgres-data:/var/lib/postgresql/data
+
+  api:
+    image: docker.io/helpfulfish/kita-go-auth:latest
+    container_name: kita-go-auth
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: gorm
+      DB_PASSWORD: gorm
+      DB_NAME: gorm
+      PORT: 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=PathPrefix(`/v1/`)" # Allow only /v1/*
+      - "traefik.http.routers.api.rule=Host(`auth.<your_domain>.com`)" # Use your subdomain
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls.certresolver=myresolver" # Use Let's Encrypt for SSL
+    expose:
+      - "80" # Exposes HTTP to Traefik only (not to the outside)
+    depends_on:
+      - db
+
+  # Traefik reverse proxy with Let's Encrypt
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    command:
+      - "--providers.docker=true" # Enable Docker provider
+      - "--entrypoints.web.address=:80" # HTTP entry point
+      - "--entrypoints.websecure.address=:443" # HTTPS entry point
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true" # Use TLS challenge for Let's Encrypt
+      - "--certificatesresolvers.myresolver.acme.email=contact@<your_domain>.com" # Your email for Let's Encrypt
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json" # Store certificates
+    ports:
+      - "80:80" # Expose HTTP
+      - "443:443" # Expose HTTPS
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock" # Allow Traefik to interact with Docker
+      - "traefik_data:/letsencrypt" # Persist Let's Encrypt data
+
+volumes:
+  traefik_data:
+
+networks:
+  web:
+    external: false

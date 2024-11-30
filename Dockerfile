@@ -1,21 +1,20 @@
-# Use the official Go image as the base image for building the app
-FROM docker.io/golang:1.23 AS builder
+FROM docker.io/golang:1.23-alpine AS builder
 
-# Set the working directory inside the container
+# Install build tools and dependencies
+RUN apk add --no-cache git
+
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Pre-cache Go dependencies
+# Pre-cache Go dependencies (minimizing rebuilds)
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# Copy the application source code
+# Copy only the application source code
 COPY . .
 
-# Copy env_template as .env (if the application needs it)
-COPY env_template .env
-
 # Build the Go application statically (no CGO dependencies)
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o /usr/local/bin/app .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /app .
 
 # Use a minimal image for runtime
 FROM docker.io/alpine:latest
@@ -26,11 +25,9 @@ RUN apk --no-cache add ca-certificates
 # Set the working directory for the runtime container
 WORKDIR /root/
 
-# Copy the built binary from the builder stage
-COPY --from=builder /usr/local/bin/app /usr/local/bin/app
-
-# Copy the .env file from the builder stage to runtime container
-COPY --from=builder /usr/src/app/.env /root/.env
+# Copy the built binary and .env from the builder stage
+COPY --from=builder /app /usr/local/bin/app
+COPY --from=builder /usr/src/app/env_template /root/.env
 
 # Expose the port your app listens on
 EXPOSE 3001
