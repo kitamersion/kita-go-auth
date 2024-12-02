@@ -51,15 +51,15 @@ docker run -p 3001:3001 kita-go-auth
 Run using `docker-compose` or `podman-compose` (Recommended)
 
 ```
-docker-compose up -d docker-compose-development.yml
+docker-compose -f docker-compose-development.yml up -d
 ```
 
 ```
-podman-compose up -d docker-compose-development.yml
+podman-compose -f docker-compose-development.yml up -d
 ```
 
 ```
-docker stop $(docker ps -aq) && docker rm $(docker ps -aq); podman rm kita-go-auth; podman build -t kita-go-auth .; podman-compose up -d docker-compose-development.yml
+docker stop $(docker ps -aq) && docker rm $(docker ps -aq); podman rm kita-go-auth; podman build -t kita-go-auth .; podman-compose -f docker-compose-development.yml up -d
 ```
 
 ## Goals

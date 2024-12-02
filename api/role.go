@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/kitamersion/kita-go-auth/domains/common"
 	"github.com/kitamersion/kita-go-auth/domains/role"
 	"github.com/kitamersion/kita-go-auth/domains/users"
+	"github.com/kitamersion/kita-go-auth/events"
 	"github.com/kitamersion/kita-go-auth/models"
 )
 
@@ -51,17 +51,11 @@ func AddUserRole(c *gin.Context) {
 		return
 	}
 
-	userRole := models.Role{
-		ID:     uuid.New().String(),
-		UserID: user.ID,
-		Role:   body.Role,
-	}
-
-	_, err = role.CreateRoleForUser(userRole)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, common.CreateResponse("Failed to add role to user"))
-		return
-	}
+	// Publish event
+	events.EventBusGo.Publish(events.RoleAssignedEvent{
+		UserId:   user.ID,
+		RoleType: body.Role,
+	})
 
 	c.JSON(http.StatusOK, common.CreateResponse("User role added successfully"))
 }

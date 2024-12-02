@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kitamersion/kita-go-auth/api"
 	"github.com/kitamersion/kita-go-auth/domains/authentication"
+	"github.com/kitamersion/kita-go-auth/events"
+	"github.com/kitamersion/kita-go-auth/events/handlers"
 	"github.com/kitamersion/kita-go-auth/initializers"
 	"github.com/kitamersion/kita-go-auth/middleware"
 )
@@ -12,9 +14,17 @@ func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectedDb()
 	initializers.MigrateDatabase()
+	initializers.SeedPermissionData(initializers.DB)
 }
 
 func main() {
+	events.InitalizeEventBus()
+
+	// TODO: remove somewhere else
+	// register event handlers
+	roleAssignedHandler := handlers.RoleAssignedHandler{}
+	events.EventBusGo.Subscribe(events.RoleAssigned, roleAssignedHandler)
+
 	r := gin.Default()
 
 	r.Use(middleware.RateLimiter)
