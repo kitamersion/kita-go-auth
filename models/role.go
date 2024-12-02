@@ -2,7 +2,10 @@ package models
 
 import "errors"
 
-type RoleType string
+type (
+	RoleType string
+	RoleId   string
+)
 
 const (
 	Admin RoleType = "ADMIN"
@@ -11,9 +14,8 @@ const (
 )
 
 type Role struct {
-	ID     string   `gorm:"primaryKey;type:uuid;index;" json:"id"`
-	UserID string   `gorm:"type:uuid;not null;index;" json:"user_id"`
-	Role   RoleType `gorm:"type:varchar(20);not null" json:"role"`
+	ID   RoleId   `gorm:"primaryKey;type:uuid;index;" json:"id"`
+	Role RoleType `json:"role"`
 }
 
 func (r RoleType) IsValid() bool {

@@ -7,22 +7,34 @@ import (
 )
 
 func MigrateDatabase() {
-	// Migrate User model
 	err := DB.AutoMigrate(&models.User{})
 	if err != nil {
 		log.Fatalf("Error running migrations for User: %v", err)
 	}
 
-	// Migrate RefreshToken model
 	err = DB.AutoMigrate(&models.RefreshToken{})
 	if err != nil {
 		log.Fatalf("Error running migrations for RefreshToken: %v", err)
 	}
 
-	// Migrate Role model
 	err = DB.AutoMigrate(&models.Role{})
 	if err != nil {
 		log.Fatalf("Error running migrations for Role: %v", err)
+	}
+
+	err = DB.AutoMigrate(&models.Permission{})
+	if err != nil {
+		log.Fatalf("Error running migrations for Permission: %v", err)
+	}
+
+	err = DB.AutoMigrate(&models.UserRole{})
+	if err != nil {
+		log.Fatalf("Error running migrations for Permission: %v", err)
+	}
+
+	err = DB.AutoMigrate(&models.RolePermission{})
+	if err != nil {
+		log.Fatalf("Error running migrations for Permission: %v", err)
 	}
 
 	log.Println("Migrations complete!")
