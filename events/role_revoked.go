@@ -1,8 +1,10 @@
 package events
 
+import "github.com/kitamersion/kita-go-auth/models"
+
 type RoleRevokedEvent struct {
-	UserId string
-	RoleId string
+	UserId models.UserId
+	RoleId models.RoleId
 }
 
 func (e RoleRevokedEvent) Name() EventName {

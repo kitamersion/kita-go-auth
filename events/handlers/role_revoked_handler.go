@@ -12,11 +12,11 @@ type RoleRevokedHandler struct{}
 func (h RoleRevokedHandler) Handle(event events.Event) {
 	e, ok := event.(events.RoleRevokedEvent)
 	if !ok {
-		log.Println("Invalid event type for RoleAssignedEvent")
+		log.Println("Invalid event type for RoleRevokedEvent")
 		return
 	}
 
-	log.Printf("Handling RoleAssignedEvent: UserID=%s, Role=%s\n", e.UserId, e.RoleId)
+	log.Printf("Handling RoleRemovedEvent: UserID=%s, Role=%s\n", e.UserId, e.RoleId)
 
 	err := role.RevokeRoleForUser(e.UserId, e.RoleId)
 	if err != nil {

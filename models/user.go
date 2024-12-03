@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+type UserId string
+
 type User struct {
 	CreatedAt   time.Time    `json:"created_at"`
 	UpdatedAt   time.Time    `json:"updated_at"`
@@ -12,12 +14,12 @@ type User struct {
 	ActivatedAt sql.NullTime `json:"activated_at"`
 	Email       string       `gorm:"unique;index" json:"email"`
 	Password    string       `json:"password"`
-	ID          string       `gorm:"primaryKey;type:uuid;index;" json:"id"`
+	ID          UserId       `gorm:"primaryKey;type:uuid;index;" json:"id"`
 }
 
 // role and permission join tables
 type UserRole struct {
-	UserId string `gorm:"primaryKey;type:uuid;index;" json:"user_id"`
+	UserId UserId `gorm:"primaryKey;type:uuid;index;" json:"user_id"`
 	RoleId RoleId `gorm:"primaryKey;type:uuid;index;" json:"role_id"`
 }
 

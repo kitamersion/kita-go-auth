@@ -2,32 +2,31 @@ package role
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/kitamersion/kita-go-auth/models"
 	"github.com/kitamersion/kita-go-auth/repository"
 )
 
-func AssignRoleToUser(userId string, roleType models.RoleType) (models.Role, error) {
-	if roleType == "" {
-		return models.Role{}, errors.New("roleType cannot be empty")
+func AssignRoleToUser(userId models.UserId, roleId models.RoleId) (models.UserRole, error) {
+	if userId == "" {
+		return models.UserRole{}, errors.New("userId cannot be empty")
 	}
 
-	existingRole, roleErr := GetRolesByRoleType(roleType)
-
-	if roleErr != nil {
-		return models.Role{}, roleErr
+	if roleId == "" {
+		return models.UserRole{}, errors.New("roleId cannot be empty")
 	}
 
 	userRoleRecord := models.UserRole{
 		UserId: userId,
-		RoleId: existingRole.ID,
+		RoleId: roleId,
 	}
 
-	_, err := repository.CreateUserRole(&userRoleRecord)
+	record, err := repository.CreateUserRole(&userRoleRecord)
 	if err != nil {
-		return models.Role{}, err
+		return models.UserRole{}, err
 	}
-	return existingRole, nil
+	return record, nil
 }
 
 func GetRolesByRoleType(roleType models.RoleType) (models.Role, error) {
@@ -42,7 +41,7 @@ func GetRolesByRoleType(roleType models.RoleType) (models.Role, error) {
 	return role, nil
 }
 
-func RevokeRoleForUser(userId string, roleId string) error {
+func RevokeRoleForUser(userId models.UserId, roleId models.RoleId) error {
 	if roleId == "" {
 		return errors.New("roleId cannot be empty")
 	}
@@ -58,57 +57,46 @@ func RevokeRoleForUser(userId string, roleId string) error {
 	return nil
 }
 
-// TODO: the below needs to be updated
-func GetRolesForUser(userId string) ([]models.Role, error) {
+func GetRoleTypeForUser(userId models.UserId) ([]models.RoleType, error) {
 	if userId == "" {
-		return []models.Role{}, errors.New("userId cannot be empty")
+		return nil, errors.New("userId cannot be empty")
 	}
 
-	userRoles, err := repository.FetchRolesByUserId(userId)
+	userRoles, err := repository.FetchUserRolesByUserId(userId)
 	if err != nil {
-		return []models.Role{}, err
-	}
-	return userRoles, nil
-}
-
-func GetRoleTypeForUser(userId string) ([]models.RoleType, error) {
-	if userId == "" {
-		return []models.RoleType{}, errors.New("userId cannot be empty")
+		return nil, fmt.Errorf("failed to fetch user roles: %w", err)
 	}
 
-	userRoles, err := repository.FetchRolesByUserId(userId)
+	roleIds := []models.RoleId{}
+	for _, userRole := range userRoles {
+		roleIds = append(roleIds, userRole.RoleId)
+	}
+
+	roles, err := repository.FetchRolesByRoleIds(roleIds)
 	if err != nil {
-		return []models.RoleType{}, err
+		return nil, fmt.Errorf("failed to fetch roles by IDs: %w", err)
 	}
-	// Initialize roleTypes as an empty slice
+
 	roleTypes := []models.RoleType{}
-	for _, role := range userRoles {
-		// TODO: validator role is valid!
-		roleTypes = append(roleTypes, role.Role)
+	for _, role := range roles {
+		if role.Role.IsValid() {
+			roleTypes = append(roleTypes, role.Role)
+		}
 	}
 
 	return roleTypes, nil
 }
 
-func DeleteRolesByRoleId(roleId models.RoleId) error {
-	if roleId == "" {
-		return errors.New("roleId cannot be empty")
-	}
-
-	err := repository.DeleteRoleByRoleId(roleId)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func DeleteRolesByUserId(userId string) error {
+func RemoveUserRoleForUser(userId models.UserId, roleId models.RoleId) error {
 	if userId == "" {
 		return errors.New("userId cannot be empty")
 	}
 
-	err := repository.DeleteRolesByUserId(userId)
+	if roleId == "" {
+		return errors.New("roleId cannot be empty")
+	}
+
+	err := repository.DeleteUserRole(userId, roleId)
 	if err != nil {
 		return err
 	}

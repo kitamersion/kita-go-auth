@@ -13,7 +13,7 @@ func CreateUserRole(userRole *models.UserRole) (models.UserRole, error) {
 	return *userRole, nil
 }
 
-func FetchUserRolesByUserId(userId string) ([]models.UserRole, error) {
+func FetchUserRolesByUserId(userId models.UserId) ([]models.UserRole, error) {
 	var userRoles []models.UserRole
 	err := initializers.DB.Where("user_id = ?", userId).Find(&userRoles).Error
 	if err != nil {
@@ -23,7 +23,7 @@ func FetchUserRolesByUserId(userId string) ([]models.UserRole, error) {
 	return userRoles, nil
 }
 
-func DeleteUserRole(userId string, roleId string) error {
+func DeleteUserRole(userId models.UserId, roleId models.RoleId) error {
 	err := initializers.DB.
 		Where("user_id = ?", userId).
 		Where("role_id = ?", roleId).

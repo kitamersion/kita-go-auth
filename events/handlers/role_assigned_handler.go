@@ -18,12 +18,12 @@ func (h RoleAssignedHandler) Handle(event events.Event) {
 
 	log.Printf("Handling RoleAssignedEvent: UserID=%s\n", e.UserId)
 
-	_, err := role.AssignRoleToUser(e.UserId, e.RoleType)
+	_, err := role.AssignRoleToUser(e.UserId, e.RoleId)
 	if err != nil {
-		log.Printf("Failed to assign role for UserId=%s, Role=%s: %v\n",
-			e.UserId, e.RoleType, err)
+		log.Printf("Failed to assign role for UserId=%s, RoleId=%s: %v\n",
+			e.UserId, e.RoleId, err)
 	} else {
-		log.Printf("Role created successfully for UserId=%s, Role=%s\n",
-			e.UserId, e.RoleType)
+		log.Printf("Role created successfully for UserId=%s, RoleId=%s\n",
+			e.UserId, e.RoleId)
 	}
 }

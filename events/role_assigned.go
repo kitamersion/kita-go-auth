@@ -3,8 +3,8 @@ package events
 import "github.com/kitamersion/kita-go-auth/models"
 
 type RoleAssignedEvent struct {
-	UserId   string
-	RoleType models.RoleType
+	UserId models.UserId
+	RoleId models.RoleId
 }
 
 func (e RoleAssignedEvent) Name() EventName {

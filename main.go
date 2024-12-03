@@ -22,8 +22,8 @@ func main() {
 
 	// TODO: remove somewhere else
 	// register event handlers
-	roleAssignedHandler := handlers.RoleAssignedHandler{}
-	events.EventBusGo.Subscribe(events.RoleAssigned, roleAssignedHandler)
+	events.EventBusGo.Subscribe(events.RoleAssigned, handlers.RoleAssignedHandler{})
+	events.EventBusGo.Subscribe(events.RoleRevoked, handlers.RoleRevokedHandler{})
 
 	r := gin.Default()
 

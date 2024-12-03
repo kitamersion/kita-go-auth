@@ -10,6 +10,7 @@ import (
 	"github.com/kitamersion/kita-go-auth/domains/common"
 	"github.com/kitamersion/kita-go-auth/domains/users"
 	"github.com/kitamersion/kita-go-auth/events"
+	"github.com/kitamersion/kita-go-auth/initializers"
 	"github.com/kitamersion/kita-go-auth/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -34,7 +35,7 @@ func Register(c *gin.Context) {
 	}
 
 	// create user
-	userId := uuid.New().String()
+	userId := models.UserId(uuid.New().String())
 	user := models.User{
 		ID:       userId,
 		Email:    body.Email,
@@ -52,12 +53,12 @@ func Register(c *gin.Context) {
 	}
 
 	events.EventBusGo.Publish(events.RoleAssignedEvent{
-		UserId:   user.ID,
-		RoleType: models.Guest,
+		UserId: user.ID,
+		RoleId: initializers.GuestRoleId,
 	})
 
 	// response
 	c.JSON(http.StatusOK, gin.H{
-		"user_id": result.ID,
+		"userId": result.ID,
 	})
 }

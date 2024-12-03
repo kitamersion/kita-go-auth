@@ -39,7 +39,7 @@ func RefreshToken(c *gin.Context) {
 
 	// Generate a new access token
 	newAccessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": refreshTokenRecord.UserID,
+		"sub": refreshTokenRecord.UserId,
 		"exp": time.Now().Add(time.Duration(common.ACCESS_TOKEN_EXPIRY) * time.Second).Unix(), // Access token expires in 1 day
 	})
 
@@ -90,7 +90,7 @@ func GenerateRefreshToken(user models.User) (string, error) {
 		newToken := models.RefreshToken{
 			ID:        uuid.New().String(),
 			Token:     refreshToken,
-			UserID:    user.ID,
+			UserId:    user.ID,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			ExpiresAt: expiresAt,
