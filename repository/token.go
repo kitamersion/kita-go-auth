@@ -13,7 +13,7 @@ func CreateRefreshToken(token models.RefreshToken) (models.RefreshToken, error) 
 	return token, nil
 }
 
-func UpdateRefreshTokenByUserId(userId string, updatedToken models.RefreshToken) (models.RefreshToken, error) {
+func UpdateRefreshTokenByUserId(userId models.UserId, updatedToken models.RefreshToken) (models.RefreshToken, error) {
 	var token models.RefreshToken
 	err := initializers.DB.Where("user_id = ?", userId).First(&token).Error
 	if err != nil {
@@ -29,12 +29,12 @@ func UpdateRefreshTokenByUserId(userId string, updatedToken models.RefreshToken)
 	return token, nil
 }
 
-func DeleteRefreshTokenByUserId(userId string) error {
+func DeleteRefreshTokenByUserId(userId models.UserId) error {
 	err := initializers.DB.Where("user_id = ?", userId).Delete(&models.RefreshToken{}).Error
 	return err
 }
 
-func FetchRefreshTokenByUserId(userId string) (models.RefreshToken, error) {
+func FetchRefreshTokenByUserId(userId models.UserId) (models.RefreshToken, error) {
 	var token models.RefreshToken
 	err := initializers.DB.Where("user_id = ?", userId).First(&token).Error
 	if err != nil {

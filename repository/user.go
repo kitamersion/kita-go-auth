@@ -13,7 +13,7 @@ func CreateUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func FetchUserById(userId string) (models.User, error) {
+func FetchUserById(userId models.UserId) (models.User, error) {
 	var user models.User
 	err := initializers.DB.First(&user, "id = ?", userId).Error
 	if err != nil {
@@ -31,7 +31,7 @@ func FetchUserByEmail(email string) (models.User, error) {
 	return user, nil
 }
 
-func UpdateUserById(userId string, userUpdates models.User) (models.User, error) {
+func UpdateUserById(userId models.UserId, userUpdates models.User) (models.User, error) {
 	var user models.User
 
 	// Ensure we only update the fields provided in userUpdates
@@ -58,7 +58,7 @@ func UpdateUserById(userId string, userUpdates models.User) (models.User, error)
 	return user, nil
 }
 
-func DeleteUserById(userId string) error {
+func DeleteUserById(userId models.UserId) error {
 	err := initializers.DB.Where("id = ?", userId).Delete(&models.User{}).Error
 	if err != nil {
 		return err

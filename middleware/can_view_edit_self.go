@@ -28,7 +28,9 @@ func CanViewEditSelf(c *gin.Context) {
 	}
 
 	// Extract the target ID from the route parameter
-	targetUserID := c.Param("id")
+	urlParam := c.Param("id")
+
+	targetUserID := models.UserId(urlParam)
 	if targetUserID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, common.CreateResponse("Target user ID is required"))
 		return

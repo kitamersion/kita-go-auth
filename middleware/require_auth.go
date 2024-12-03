@@ -10,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/kitamersion/kita-go-auth/domains/common"
 	"github.com/kitamersion/kita-go-auth/domains/users"
+	"github.com/kitamersion/kita-go-auth/models"
 )
 
 func RequireAuth(c *gin.Context) {
@@ -53,22 +54,27 @@ func RequireAuth(c *gin.Context) {
 		return
 	}
 
-	// Find user by the token's subject (sub)
-	sub, ok := claims["sub"].(string)
+	sub, ok := claims["sub"]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, common.CreateResponse("Invalid token subject"))
 		return
 	}
 
-	user, err := users.GetUserById(sub)
+	subStr, ok := sub.(string)
+	if !ok || subStr == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, common.CreateResponse("Invalid token subject format"))
+		return
+	}
+
+	targetUserID := models.UserId(subStr)
+
+	user, err := users.GetUserById(targetUserID)
 	if err != nil || user.ID == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, common.CreateResponse("User not found"))
 		return
 	}
 
-	// Attach the user to the context
 	c.Set("user", user)
 
-	// Continue with the next handler
 	c.Next()
 }

@@ -18,7 +18,7 @@ type UserResponse struct {
 	UpdatedAt   time.Time         `json:"updated_at"`
 	ActivatedAt *time.Time        `json:"activated_at"` // Use a pointer to allow null values
 	Email       string            `json:"email"`
-	ID          string            `json:"id"`
+	ID          models.UserId     `json:"id"`
 	Roles       []models.RoleType `json:"roles"`
 }
 
@@ -61,13 +61,15 @@ func WhoAmI(c *gin.Context) {
 }
 
 func User(c *gin.Context) {
-	targetUserID := c.Param("id")
-	if c.Bind(&targetUserID) != nil {
+	urlParam := c.Param("id")
+
+	targetUserId := models.UserId(urlParam)
+	if c.Bind(&targetUserId) != nil {
 		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 
-	user, err := users.GetUserById(targetUserID)
+	user, err := users.GetUserById(targetUserId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.CreateResponse("Error fetching user"))
 		return
@@ -103,13 +105,15 @@ func User(c *gin.Context) {
 }
 
 func ActivateUser(c *gin.Context) {
-	targetUserID := c.Param("id")
-	if c.Bind(&targetUserID) != nil {
+	urlParam := c.Param("id")
+
+	targetUserId := models.UserId(urlParam)
+	if c.Bind(&targetUserId) != nil {
 		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 
-	user, userErr := users.GetUserById(targetUserID)
+	user, userErr := users.GetUserById(targetUserId)
 	if userErr != nil {
 		c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 		return
@@ -127,13 +131,15 @@ func ActivateUser(c *gin.Context) {
 }
 
 func DeactivateUser(c *gin.Context) {
-	targetUserID := c.Param("id")
-	if c.Bind(&targetUserID) != nil {
+	urlParam := c.Param("id")
+
+	targetUserId := models.UserId(urlParam)
+	if c.Bind(&targetUserId) != nil {
 		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
 
-	user, userErr := users.GetUserById(targetUserID)
+	user, userErr := users.GetUserById(targetUserId)
 	if userErr != nil {
 		c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 		return
@@ -152,8 +158,10 @@ func DeactivateUser(c *gin.Context) {
 
 // TODO: transactional scope
 func DeleteUser(c *gin.Context) {
-	targetUserID := c.Param("id")
-	if c.Bind(&targetUserID) != nil {
+	urlParam := c.Param("id")
+
+	targetUserId := models.UserId(urlParam)
+	if c.Bind(&targetUserId) != nil {
 		c.JSON(http.StatusBadRequest, common.CreateResponse("Failed to target user ID from url pathname"))
 		return
 	}
@@ -167,8 +175,8 @@ func DeleteUser(c *gin.Context) {
 
 	authUser := u.(models.User)
 
-	if authUser.ID != targetUserID {
-		userRecord, userErr := users.GetUserById(targetUserID)
+	if authUser.ID != targetUserId {
+		userRecord, userErr := users.GetUserById(targetUserId)
 		if userErr != nil {
 			c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))
 			return
@@ -187,9 +195,8 @@ func DeleteUser(c *gin.Context) {
 	// TODO: service for this??
 	repository.DeleteRefreshTokenByUserId(user.ID)
 
-	role.DeleteRolesByUserId(user.ID)
-
-	if authUser.ID == targetUserID {
+	// TODO: delete user_roles by userId
+	if authUser.ID == targetUserId {
 		// TODO: move to common domain for user deletion and logout to clear cookies
 		c.SetCookie("Authorization", "", -1, "", "", common.IsProduction, true)
 		c.SetCookie("RefreshToken", "", -1, "", "", common.IsProduction, true)
