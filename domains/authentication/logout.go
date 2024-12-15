@@ -3,14 +3,13 @@ package authentication
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kitamersion/kita-go-auth/domains/common"
 	"github.com/kitamersion/kita-go-auth/models"
 	"github.com/kitamersion/kita-go-auth/repository"
-	"github.com/gin-gonic/gin"
 )
 
 func Logout(c *gin.Context) {
-	// Check if the user exists in the context
 	user, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusNotFound, common.CreateResponse("User not found"))

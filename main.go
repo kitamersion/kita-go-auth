@@ -27,16 +27,21 @@ func main() {
 
 	r := gin.Default()
 
+	r.Use(middleware.CORS)
 	r.Use(middleware.RateLimiter)
 
 	v1 := r.Group("/v1")
 	{
+		// No Auth
 		v1.POST("/register", authentication.Register)
 		v1.POST("/login", authentication.Login)
 		v1.POST("/token/refresh", authentication.RefreshToken)
 
+		// Auth
 		v1.GET("/whoami", middleware.RequireAuth, api.WhoAmI)
+		v1.POST("/logout", middleware.RequireAuth, authentication.Logout)
 
+		// Auth + protected by permissions
 		user := v1.Group("/user")
 		user.Use(middleware.RequireAuth, middleware.CanViewEditSelf)
 		{
@@ -52,8 +57,6 @@ func main() {
 				roles.PUT("/", api.AddUserRole)
 				roles.DELETE("/", api.RemoveUserRole)
 			}
-
-			user.POST("/logout", authentication.Logout)
 		}
 	}
 

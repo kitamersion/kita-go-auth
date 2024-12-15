@@ -50,6 +50,7 @@ func Login(c *gin.Context) {
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.ID,
 		"exp": time.Now().Add(time.Duration(common.ACCESS_TOKEN_EXPIRY) * time.Second).Unix(), // Access token expires in 1 day
+		"iat": time.Now().Unix(),
 	})
 
 	// Sign and get the complete encoded access token as a string
